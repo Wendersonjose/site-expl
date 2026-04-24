@@ -1,0 +1,27 @@
+:root {
+    --color-bg-primary: #111;
+    --color-bg-secondary: #000;
+    --color-bg-tertiary: #333;
+    --color-text-primary: #fff;
+    --color-accent-primary: orange;
+    --color-accent-hover: red;
+    --spacing-unit: 10px;
+    --spacing-section: 30px;
+    --font-family: Arial, sans-serif;
+    --font-size-h1: 40px;
+    --font-size-button: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    margin: 0;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    text-align: center;
+}

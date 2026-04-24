@@ -1,0 +1,12 @@
+header {
+    background-color: var(--color-bg-secondary);
+    padding: 20px;
+}
+
+header h1 {
+    font-size: var(--font-size-h1);
+}
+
+.logo {
+    width: 120px;
+}
