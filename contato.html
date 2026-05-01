@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contato - EXPL 💥</title>
+    <link rel="stylesheet" href="Style.css">
+</head>
+
+<body class="pagina-contato">
+
+<header>
+    <h1>EXPL 💥</h1>
+    <p>Fale com a gente!</p>
+</header>
+
+<main>
+
+    <section class="info-contato">
+        <h2>📞 Informações de Contato</h2>
+        <p><strong>Responsável:</strong> Gabriel Moreira</p>
+        <p><strong>Telefone:</strong> (34) 99873-4521</p>
+        <p><strong>Email:</strong> contato@explosionenergy.com</p>
+    </section>
+
+    <section class="chat-container">
+        <h2>💬 Chat com a EXPL</h2>
+
+        <div id="chat-box" class="chat-box"></div>
+
+        <div class="chat-input">
+            <input type="text" id="mensagem" placeholder="Digite sua mensagem..." />
+            <button onclick="enviarMensagem()">Enviar</button>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p>&copy; 2026 EXPL Company</p>
+</footer>
+
+<!-- 🔥 SCRIPT PRINCIPAL -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } 
+from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAEj_UR3sFPYUsLMoqAejCMHMYbEw6dAhY",
+  authDomain: "explosion-e1a4b.firebaseapp.com",
+  projectId: "explosion-e1a4b",
+  storageBucket: "explosion-e1a4b.firebasestorage.app",
+  messagingSenderId: "313242756676",
+  appId: "1:313242756676:web:0ca67618e3eb726210be11",
+  measurementId: "G-J0YJFJ6JH0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🔥 ID único automático por aba
+const usuarioId = Math.random().toString(36).substring(2, 10);
+
+// salvar mensagem
+window.enviarMensagemFirebase = async function(texto) {
+  await addDoc(collection(db, "mensagens"), {
+    texto: texto,
+    usuarioId: usuarioId,
+    timestamp: new Date()
+  });
+};
+
+// escutar mensagens
+window.addEventListener("DOMContentLoaded", () => {
+  const chatBox = document.getElementById("chat-box");
+
+  const q = query(collection(db, "mensagens"), orderBy("timestamp"));
+
+  onSnapshot(q, (snapshot) => {
+    chatBox.innerHTML = "";
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      const msg = document.createElement("div");
+      msg.classList.add("msg");
+
+      if (data.usuarioId === usuarioId) {
+        msg.classList.add("user");
+      } else {
+        msg.classList.add("other");
+      }
+
+      msg.innerText = data.texto;
+
+      chatBox.appendChild(msg);
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+});
+</script>
+
+<!-- 🔥 ENVIO -->
+<script>
+function enviarMensagem() {
+    const input = document.getElementById("mensagem");
+    const texto = input.value.trim();
+
+    if (texto === "") return;
+
+    window.enviarMensagemFirebase(texto);
+
+    input.value = "";
+}
+</script>
+
+</body>
+</html>
