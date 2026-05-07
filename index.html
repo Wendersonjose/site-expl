@@ -1,131 +1,113 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 
-<!-- ============================================
-     HEAD - Metadados e Configurações
-     ============================================ -->
 <head>
-    <!-- Configurações básicas de encoding e responsividade -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    
-    <!-- SEO e descrição da página -->
-    <meta name="description" content="EXPL - Produtos energéticos de alta performance. Conheça nossa linha completa de bebidas energéticas.">
-    <meta name="keywords" content="explosion, energético, bebidas, performance, energia">
-    <meta name="author" content="EXPL Company">
-    
-    <!-- Título da página -->
-    <title>EXPL 💥 - Produtos Energéticos</title>
-    
-    <!-- Estilos externos -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta name="description" content="EXPL - Energia extrema para sua performance.">
+    <title>EXPL 💥 - High Performance Energy</title>
+    <link rel="stylesheet" href="Style.css">
 </head>
 
-<!-- ============================================
-     BODY - Conteúdo Principal
-     ============================================ -->
 <body>
 
-    <!-- ============================================
-         HEADER - Cabeçalho do Site
-         ============================================ -->
+    <!-- Estrutura de Topo inspirada no exemplo -->
     <header role="banner">
-        <h1>EXPL 💥</h1>
-        <p class="subtitle">Welcome to EXPL💥</p>
+        <div class="header-container">
+            <div class="brand">
+                <h1>EXPL 💥</h1>
+                <p class="subtitle">MAXIMIZE SEU POTENCIAL</p>
+            </div>
+            
+            <!-- Espaço para o Slogan Lateral (como na imagem) -->
+            <div class="slogan-destaque">
+                <h2>Energia extrema todo dia, venha e confira!</h2>                
+            </div>
+        </div>
+
+        <!-- Menu de Navegação com SEUS botões originais -->
+        <nav class="main-nav">
+            <div class="button-group">
+                <button id="btnContato">Fale com a gente</button>
+                <button onclick="window.location.href='produtos.html'">Produtos</button>
+                <button onclick="window.location.href='contato.html'">Contato</button>
+                <button class="btn-worker" onclick="window.location.href='login.html'">Área do Trabalhador</button>
+            </div>
+        </nav>
     </header>
 
-    <!-- ============================================
-         MAIN - Conteúdo Principal
-         ============================================ -->
     <main role="main">
         
-        <!-- Seção: Produtos em Destaque -->
-        <section class="produtos-destaque" aria-labelledby="produtos-titulo">
-            <h2 id="produtos-titulo">🔥 Produtos em Destaque</h2>
-            
-            <!-- Tabela de produtos com melhor performance -->
-            <table role="table" aria-label="Tabela de produtos em destaque">
+        <!-- Seção de Benefícios (Cards) -->
+        <section class="beneficios">
+            <div class="cards-container">
+                <div class="card">
+                    <h3>Foco Mental</h3>
+                    <p>Fórmula enriquecida com Taurina para manter sua concentração no auge.</p>
+                </div>
+                <div class="card">
+                    <h3>Zero Açúcar</h3>
+                    <p>Energia pura sem picos de insulina, ideal para manter a saúde.</p>
+                </div>
+                <div class="card">
+                    <h3>Recuperação Rápida</h3>
+                    <p>Contém eletrólitos que auxiliam na hidratação pós-treino.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Nosso Catálogo -->
+        <section class="produtos-destaque">
+            <table role="table">
                 <thead>
                     <tr>
                         <th scope="col">Produto</th>
-                        <th scope="col">Lucro (R$)</th>
+                        <th scope="col">Diferencial</th>
+                        <th scope="col">Ingrediente Chave</th>
+                        <th scope="col">Volume</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Explosion Morango</td>
-                        <td>6.480,80</td>
+                        <td><strong>Explosion Morango</strong></td>
+                        <td>Sabor Intenso</td>
+                        <td>Extrato de Guaraná</td>
+                        <td>473ml</td>
                     </tr>
                     <tr>
-                        <td>Explosion Prime Uva</td>
-                        <td>5.277,86</td>
+                        <td><strong>Explosion Prime Uva</strong></td>
+                        <td>Fórmula Premium</td>
+                        <td>BCAA + Cafeína</td>
+                        <td>500ml</td>
                     </tr>
                     <tr>
-                        <td>Explosion Açaí</td>
-                        <td>3.529,55</td>
+                        <td><strong>Explosion Açaí</strong></td>
+                        <td>Energia Natural</td>
+                        <td>Antocianinas</td>
+                        <td>473ml</td>
                     </tr>
                     <tr>
-                        <td>Explosion Citrus</td>
-                        <td>3.020,87</td>
+                        <td><strong>Explosion Citrus</strong></td>
+                        <td>Refrescância Total</td>
+                        <td>Vitamina C e Zinco</td>
+                        <td>473ml</td>
                     </tr>
                 </tbody>
             </table>
         </section>
 
-        <!-- Seção: Contato -->
-        <section class="contato" aria-labelledby="contato-titulo">
-            <h2 id="contato-titulo">📞 Contato</h2>
-            <p>Quer saber mais sobre nossos produtos?</p>
-            
-            <!-- Botão de contato com ID para manipulação JS -->
-            <button 
-                id="btnContato" 
-                type="button"
-                aria-label="Clique para solicitar contato">
-                Fale com a gente
-            </button>
-            <button onclick="window.location.href='pages/auth/login.html'">
-                Área do Trabalhador
-            </button>
-            <button onclick="window.location.href='pages/contato/index.html'">
-                Contato
-            </button>
-            <button onclick="window.location.href='pages/produtos/index.html'">
-                Produtos
-            </button>
-        </section>
-
     </main>
 
-    <!-- ============================================
-         FOOTER - Rodapé do Site
-         ============================================ -->
     <footer role="contentinfo">
-        <p>&copy; 2026 EXPL Company. Todos os direitos reservados.</p>
+        <p>&copy; 2026 EXPL Company. Todos os direitos reservados. | Pertinho de você!</p>
     </footer>
 
-    <!-- ============================================
-         SCRIPTS - JavaScript
-         ============================================ -->
     <script>
-        /**
-         * ============================================
-         * Inicialização dos Event Listeners
-         * ============================================
-         */
         document.addEventListener('DOMContentLoaded', function() {
-            
-            /**
-             * Event Listener: Botão de Contato
-             * Exibe mensagem de confirmação ao usuário
-             */
             const btnContato = document.getElementById('btnContato');
-            
             if (btnContato) {
-                btnContato.addEventListener('click', function() {
-                    alert('Entraremos em contato em breve!');
-                });
+                btnContato.addEventListener('click', () => alert('Um consultor entrará em contato!'));
             }
         });
     </script>
