@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
+// URL do painel administrativo (app separado). Configurável por env.
+const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'
+
 function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
@@ -51,14 +54,32 @@ function Login() {
           onKeyDown={e => e.key === 'Enter' && fazerLogin()} />
       </div>
 
-      <button onClick={fazerLogin} disabled={carregando} style={{ marginBottom: '15px' }}>
+      <button onClick={fazerLogin} disabled={carregando} style={{ marginBottom: '10px' }}>
         {carregando ? 'Entrando...' : 'Entrar'}
       </button>
 
-      <p style={{ marginTop: '15px' }}>
+      <p style={{ marginBottom: '15px' }}>
+        <Link to="/esqueci-senha" style={{ color: '#aaa', fontSize: '14px' }}>
+          Esqueci minha senha
+        </Link>
+      </p>
+
+      <p style={{ marginTop: '5px' }}>
         Não tem conta?{' '}
         <Link to="/cadastro" style={{ color: 'orange' }}>Cadastre-se</Link>
       </p>
+
+      <div style={{
+        marginTop: '28px', paddingTop: '20px', borderTop: '1px solid #333',
+        maxWidth: '320px', marginLeft: 'auto', marginRight: 'auto'
+      }}>
+        <p style={{ color: '#888', fontSize: '13px', marginBottom: '10px' }}>É administrador?</p>
+        <a href={ADMIN_URL}>
+          <button type="button" style={{ background: '#333' }}>
+            Acesso administrativo
+          </button>
+        </a>
+      </div>
     </div>
   )
 }

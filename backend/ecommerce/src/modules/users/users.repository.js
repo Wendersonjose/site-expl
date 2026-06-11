@@ -39,6 +39,26 @@ export async function existsByEmail(email) {
   return rows.length > 0;
 }
 
+/**
+ * Busca por id incluindo o hash da senha — usado no fluxo de redefinição
+ * (o hash atual compõe o segredo do token, tornando-o de uso único).
+ */
+export async function findByIdWithPassword(id) {
+  const [rows] = await pool.query(
+    'SELECT id_usuario, nome, email, senha, perfil FROM usuarios WHERE id_usuario = ?',
+    [id],
+  );
+  return rows[0] ?? null;
+}
+
+export async function updatePassword(id, senhaHash) {
+  const [result] = await pool.query('UPDATE usuarios SET senha = ? WHERE id_usuario = ?', [
+    senhaHash,
+    id,
+  ]);
+  return result.affectedRows > 0;
+}
+
 export async function create(user) {
   const [result] = await pool.query(
     `INSERT INTO usuarios (nome, email, senha, perfil) VALUES (?, ?, ?, ?)`,

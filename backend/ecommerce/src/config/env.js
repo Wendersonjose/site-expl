@@ -44,6 +44,19 @@ export const env = {
     .split(',')
     .map((url) => url.trim())
     .filter(Boolean),
+
+  // URL base da loja (onde mora a página de redefinição de senha).
+  lojaUrl: optional('LOJA_URL', 'http://localhost:5173'),
+
+  // SMTP é opcional: sem host configurado, o mailer entra em modo dev
+  // (loga o link de redefinição no console em vez de enviar e-mail).
+  smtp: {
+    host: optional('SMTP_HOST', ''),
+    port: Number(optional('SMTP_PORT', '587')),
+    user: optional('SMTP_USER', ''),
+    pass: optional('SMTP_PASSWORD', ''),
+    from: optional('SMTP_FROM', 'Explosion <no-reply@explosion.dev>'),
+  },
 };
 
 export const isProduction = env.nodeEnv === 'production';

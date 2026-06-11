@@ -45,6 +45,26 @@ export const authService = {
       body: JSON.stringify({ nome, email, senha })
     })
     return handleResponse(res)
+  },
+
+  // POST /auth/forgot-password -> { devResetUrl? } (em dev, devolve o link)
+  async esqueciSenha(email) {
+    const res = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    })
+    return handleResponse(res)
+  },
+
+  // POST /auth/reset-password -> null (redefine a senha pelo token do link)
+  async redefinirSenha(token, novaSenha) {
+    const res = await fetch(`${API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, novaSenha })
+    })
+    return handleResponse(res)
   }
 }
 

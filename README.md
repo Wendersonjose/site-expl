@@ -153,6 +153,8 @@ Base: `http://localhost:3000` · Documentação interativa: `http://localhost:30
 | POST | `/auth/register` | Registra um **cliente** (retorna token) |
 | POST | `/auth/login` | Login por e-mail e senha (retorna token) |
 | GET | `/auth/me` | Dados do usuário autenticado |
+| POST | `/auth/forgot-password` | Envia link de redefinição de senha (e-mail) |
+| POST | `/auth/reset-password` | Redefine a senha usando o token do link |
 
 ### 📦 Produtos — `/products`
 | Método | Rota | Acesso |
