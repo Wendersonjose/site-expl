@@ -10,7 +10,7 @@ function validateId(id) {
   const numericId = Number(id);
 
   if (!Number.isInteger(numericId) || numericId <= 0) {
-    throw createHttpError(400, 'ID do usuário inválido');
+    throw createHttpError(400, 'ID do usuario invalido');
   }
 
   return numericId;
@@ -27,7 +27,7 @@ function validateUserPayload(payload, { partial = false } = {}) {
 
   if (!partial || payload.email !== undefined) {
     if (!payload.email || !payload.email.includes('@')) {
-      errors.push('Email inválido');
+      errors.push('Email invalido');
     }
   }
 
@@ -35,6 +35,10 @@ function validateUserPayload(payload, { partial = false } = {}) {
     if (!payload.senha || payload.senha.length < 6) {
       errors.push('A senha deve ter pelo menos 6 caracteres');
     }
+  }
+
+  if (payload.perfil !== undefined && !['cliente', 'admin'].includes(payload.perfil)) {
+    errors.push('Perfil deve ser cliente ou admin');
   }
 
   return errors;
@@ -55,7 +59,7 @@ export async function getUserById(id) {
   const user = await userRepository.findById(userId);
 
   if (!user) {
-    throw createHttpError(404, 'Usuário não encontrado');
+    throw createHttpError(404, 'Usuario nao encontrado');
   }
 
   return user;
@@ -68,7 +72,7 @@ export async function createUser(payload) {
   const existingUser = await userRepository.findByEmail(payload.email);
 
   if (existingUser) {
-    throw createHttpError(409, 'Email já cadastrado');
+    throw createHttpError(409, 'Email ja cadastrado');
   }
 
   return userRepository.create({
@@ -88,7 +92,7 @@ export async function updateUser(id, payload) {
   const currentUser = await userRepository.findById(userId);
 
   if (!currentUser) {
-    throw createHttpError(404, 'Usuário não encontrado');
+    throw createHttpError(404, 'Usuario nao encontrado');
   }
 
   return userRepository.update(userId, {
@@ -104,6 +108,6 @@ export async function deleteUser(id) {
   const deletedUser = await userRepository.remove(userId);
 
   if (!deletedUser) {
-    throw createHttpError(404, 'Usuário não encontrado');
+    throw createHttpError(404, 'Usuario nao encontrado');
   }
 }
