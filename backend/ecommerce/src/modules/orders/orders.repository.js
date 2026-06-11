@@ -63,6 +63,17 @@ export async function decrementStock(conn, idProduto, quantidade) {
   );
 }
 
+/**
+ * Atualiza o status de um pedido. Aceita uma conexão de transação
+ * (`executor`) para compor com outras escritas atômicas (ex.: pagamento).
+ */
+export async function updateStatus(executor, idPedido, status) {
+  await (executor ?? pool).query('UPDATE pedidos SET status = ? WHERE id_pedido = ?', [
+    status,
+    idPedido,
+  ]);
+}
+
 const ORDER_SELECT = `
   SELECT
     p.id_pedido, p.id_usuario, p.data_pedido, p.status,

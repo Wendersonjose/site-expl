@@ -7,8 +7,10 @@ import { swaggerSpec } from './config/swagger.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import categoryRoutes from './modules/categories/categories.routes.js';
 import orderRoutes from './modules/orders/orders.routes.js';
+import paymentRoutes from './modules/payments/payments.routes.js';
 import productRoutes from './modules/products/products.routes.js';
 import reportRoutes from './modules/reports/reports.routes.js';
+import reviewRoutes from './modules/reviews/reviews.routes.js';
 import userRoutes from './modules/users/users.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { notFoundMiddleware } from './middlewares/notFound.middleware.js';
@@ -30,8 +32,10 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/auth', authRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/orders', orderRoutes);
+app.use('/payments', paymentRoutes);
 app.use('/products', productRoutes);
 app.use('/reports', reportRoutes);
+app.use('/reviews', reviewRoutes);
 app.use('/users', userRoutes);
 
 // 404 e tratamento central de erros (sempre por último).

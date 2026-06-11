@@ -174,6 +174,19 @@ Base: `http://localhost:3000` · Documentação interativa: `http://localhost:30
 | GET | `/orders` | Lista os pedidos do usuário |
 | GET | `/orders/:id` | Detalhe do pedido |
 
+### 💳 Pagamentos — `/payments`
+| Método | Rota | Acesso |
+|--------|------|--------|
+| GET | `/payments/methods` | público (formas de pagamento ativas) |
+| POST | `/payments` | cliente autenticado (paga um pedido → status `pago`) |
+| GET | `/payments/order/:idPedido` | dono do pedido / admin |
+
+### ⭐ Avaliações — `/reviews`
+| Método | Rota | Acesso |
+|--------|------|--------|
+| GET | `/reviews/product/:idProduto` | público (média + total + comentários) |
+| POST | `/reviews` | cliente autenticado (só avalia produto que comprou) |
+
 ### 📊 Relatórios — `/reports` (admin)
 `/dashboard`, `/faturamento-total`, `/ticket-medio`, `/produtos-mais-vendidos`,
 `/clientes-com-mais-compras`, `/estoque-baixo` — cada um com `…/export/csv` e `…/export/pdf`.
@@ -202,10 +215,12 @@ As queries usam **parâmetros** (`?`) — proteção contra SQL Injection — e 
 | Produtos (CRUD) | ✅ | ✅ (catálogo) | ✅ (gestão) |
 | Categorias | ✅ | — | ✅ |
 | Pedidos | ✅ | ✅ (checkout + "Meus Pedidos") | — |
+| Pagamentos | ✅ | ✅ (paga pedido pendente) | — |
+| Avaliações | ✅ | ✅ (avalia compra / vê notas) | — |
 | Relatórios + export CSV/PDF | ✅ | — | ✅ (dashboard) |
 | Usuários | ✅ | — | ✅ |
 
-**Próximos passos:** pagamentos (`transacoes_financeiras`), avaliações, carrinho persistido no banco e cupons.
+**Próximos passos:** carrinho persistido no banco, cupons de desconto e promoções.
 
 ---
 

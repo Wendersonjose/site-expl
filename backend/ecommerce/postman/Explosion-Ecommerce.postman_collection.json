@@ -1,0 +1,500 @@
+{
+	"info": {
+		"_postman_id": "explosion-ecommerce-api",
+		"name": "💥 Explosion E-commerce API",
+		"description": "Collection completa da API REST do e-commerce Explosion (Node.js + Express + MySQL).\n\n## 🚀 Como usar\n1. Importe o Environment (`Explosion-Environment.postman_environment.json`).\n2. Confira a variável `baseUrl` (`http://localhost:3000`).\n3. Faça **Auth > Login** — o token JWT é salvo automaticamente em `authToken` e usado nas demais rotas.\n\n## 👤 Perfis\n- **cliente**: faz pedidos, paga e avalia produtos que comprou.\n- **admin**: gestão de produtos, categorias, usuários e relatórios.\n\n> Contas admin não são criadas pelo registro público — use `node scripts/create-admin.js`.\n\n## 📌 Módulos\nAuth · Products · Categories · Orders · Payments · Reviews · Users · Reports",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+	},
+	"item": [
+		{
+			"name": "🔐 Auth",
+			"description": "Autenticação e registro de usuários.",
+			"item": [
+				{
+					"name": "Register (Cadastro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  const r = pm.response.json();",
+									"  if (r.data && r.data.token) {",
+									"    pm.environment.set('authToken', r.data.token);",
+									"    console.log('✅ Token salvo');",
+									"  }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"senha\": \"senha123\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+						"description": "Registra um novo **cliente** e retorna um token JWT.\n\n📖 Público."
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const r = pm.response.json();",
+									"  if (r.data && r.data.token) {",
+									"    pm.environment.set('authToken', r.data.token);",
+									"    console.log('✅ Token salvo | perfil:', r.data.user.perfil);",
+									"  }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"senha\": \"senha123\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+						"description": "Autentica e retorna `{ user, token }`. O token é salvo automaticamente.\n\n📖 Público."
+					}
+				},
+				{
+					"name": "Get Me (Verificar Token)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] },
+						"description": "Retorna os dados do usuário autenticado.\n\n🔒 Requer autenticação."
+					}
+				}
+			]
+		},
+		{
+			"name": "📦 Products",
+			"description": "Catálogo de produtos.",
+			"item": [
+				{
+					"name": "List Products",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products?search=&categoria=&ativo=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["products"],
+							"query": [
+								{ "key": "search", "value": "", "description": "Busca por nome/descrição" },
+								{ "key": "categoria", "value": "", "description": "ID da categoria" },
+								{ "key": "ativo", "value": "true", "description": "true/false" }
+							]
+						},
+						"description": "Lista produtos com filtros opcionais.\n\n📖 Público."
+					}
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/products/1", "host": ["{{baseUrl}}"], "path": ["products", "1"] },
+						"description": "Busca um produto por ID.\n\n📖 Público."
+					}
+				},
+				{
+					"name": "Create Product (admin)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Camiseta Explosion\",\n  \"descricao\": \"Camiseta de algodão premium\",\n  \"precoVenda\": 89.90,\n  \"custoUnitario\": 45.00,\n  \"estoque\": 100,\n  \"idCategoria\": 1,\n  \"ativo\": true,\n  \"imagens\": [\n    { \"url\": \"https://example.com/img1.jpg\", \"principal\": true }\n  ]\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] },
+						"description": "Cria um produto.\n\n🔒👑 Apenas admin."
+					}
+				},
+				{
+					"name": "Update Product (admin)",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"precoVenda\": 99.90,\n  \"estoque\": 50\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/products/1", "host": ["{{baseUrl}}"], "path": ["products", "1"] },
+						"description": "Atualiza um produto (campos parciais).\n\n🔒👑 Apenas admin."
+					}
+				},
+				{
+					"name": "Delete Product (admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/products/1", "host": ["{{baseUrl}}"], "path": ["products", "1"] },
+						"description": "Remove um produto.\n\n🔒👑 Apenas admin."
+					}
+				}
+			]
+		},
+		{
+			"name": "🏷️ Categories",
+			"description": "Categorias de produtos.",
+			"item": [
+				{
+					"name": "List Categories",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] },
+						"description": "Lista as categorias.\n\n📖 Público."
+					}
+				},
+				{
+					"name": "Create Category (admin)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"nomeCategoria\": \"Energéticos\"\n}" },
+						"url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] },
+						"description": "Cria uma categoria.\n\n🔒👑 Apenas admin."
+					}
+				},
+				{
+					"name": "Delete Category (admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/categories/1", "host": ["{{baseUrl}}"], "path": ["categories", "1"] },
+						"description": "Remove uma categoria.\n\n🔒👑 Apenas admin."
+					}
+				}
+			]
+		},
+		{
+			"name": "🛒 Orders",
+			"description": "Pedidos do cliente autenticado.",
+			"item": [
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  const r = pm.response.json();",
+									"  if (r.data && r.data.id) {",
+									"    pm.environment.set('lastOrderId', r.data.id);",
+									"    console.log('🛒 Pedido criado:', r.data.id);",
+									"  }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"endereco\": {\n    \"cep\": \"50000-000\",\n    \"rua\": \"Rua das Flores\",\n    \"numero\": \"123\",\n    \"complemento\": \"Apto 45\",\n    \"cidade\": \"Recife\",\n    \"estado\": \"PE\"\n  },\n  \"itens\": [\n    { \"idProduto\": 1, \"quantidade\": 2 }\n  ]\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+						"description": "Cria um pedido (verifica e baixa o estoque em transação). Salva o id em `lastOrderId`.\n\n🔒 Requer autenticação."
+					}
+				},
+				{
+					"name": "List My Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+						"description": "Lista os pedidos do usuário autenticado.\n\n🔒 Requer autenticação."
+					}
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/orders/{{lastOrderId}}", "host": ["{{baseUrl}}"], "path": ["orders", "{{lastOrderId}}"] },
+						"description": "Detalhe de um pedido (dono ou admin).\n\n🔒 Requer autenticação."
+					}
+				}
+			]
+		},
+		{
+			"name": "💳 Payments",
+			"description": "Formas de pagamento e pagamento de pedidos.",
+			"item": [
+				{
+					"name": "List Payment Methods",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/payments/methods", "host": ["{{baseUrl}}"], "path": ["payments", "methods"] },
+						"description": "Lista as formas de pagamento ativas (ex.: Pix, Cartão, Boleto).\n\n📖 Público."
+					}
+				},
+				{
+					"name": "Pay Order",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idPedido\": {{lastOrderId}},\n  \"idForma\": 1,\n  \"codigoExterno\": \"PIX-ABC123\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/payments", "host": ["{{baseUrl}}"], "path": ["payments"] },
+						"description": "Paga um pedido pendente: cria a transação confirmada e marca o pedido como `pago`.\n\n🔒 Requer autenticação (dono do pedido ou admin)."
+					}
+				},
+				{
+					"name": "List Order Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/payments/order/{{lastOrderId}}", "host": ["{{baseUrl}}"], "path": ["payments", "order", "{{lastOrderId}}"] },
+						"description": "Lista os pagamentos de um pedido.\n\n🔒 Requer autenticação (dono do pedido ou admin)."
+					}
+				}
+			]
+		},
+		{
+			"name": "⭐ Reviews",
+			"description": "Avaliações de produtos.",
+			"item": [
+				{
+					"name": "Product Reviews",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/reviews/product/1", "host": ["{{baseUrl}}"], "path": ["reviews", "product", "1"] },
+						"description": "Lista as avaliações de um produto com média e total.\n\n📖 Público."
+					}
+				},
+				{
+					"name": "Create Review",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idProduto\": 1,\n  \"idPedido\": {{lastOrderId}},\n  \"nota\": 5,\n  \"comentario\": \"Produto excelente!\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/reviews", "host": ["{{baseUrl}}"], "path": ["reviews"] },
+						"description": "Avalia um produto comprado (nota 1-5). O pedido precisa ser seu e conter o produto.\n\n🔒 Requer autenticação."
+					}
+				}
+			]
+		},
+		{
+			"name": "👥 Users (admin)",
+			"description": "Gestão de usuários (apenas admin).",
+			"item": [
+				{
+					"name": "List Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+						"description": "Lista usuários.\n\n🔒👑 Apenas admin."
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users", "1"] },
+						"description": "Busca um usuário por ID.\n\n🔒👑 Apenas admin."
+					}
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Santos\",\n  \"email\": \"maria@example.com\",\n  \"senha\": \"senha123\",\n  \"perfil\": \"cliente\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+						"description": "Cria um usuário (perfis: `cliente`, `admin`).\n\n🔒👑 Apenas admin."
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Santos Silva\",\n  \"perfil\": \"admin\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/users/2", "host": ["{{baseUrl}}"], "path": ["users", "2"] },
+						"description": "Atualiza um usuário (não altera senha).\n\n🔒👑 Apenas admin."
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/users/2", "host": ["{{baseUrl}}"], "path": ["users", "2"] },
+						"description": "Remove um usuário.\n\n🔒👑 Apenas admin."
+					}
+				}
+			]
+		},
+		{
+			"name": "📊 Reports (admin)",
+			"description": "Relatórios gerenciais com exportação CSV/PDF (apenas admin).",
+			"item": [
+				{
+					"name": "List Reports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/reports", "host": ["{{baseUrl}}"], "path": ["reports"] },
+						"description": "Catálogo de relatórios disponíveis."
+					}
+				},
+				{
+					"name": "Reports Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/reports/status", "host": ["{{baseUrl}}"], "path": ["reports", "status"] },
+						"description": "Status da API de relatórios e do banco."
+					}
+				},
+				{
+					"name": "Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/reports/dashboard", "host": ["{{baseUrl}}"], "path": ["reports", "dashboard"] },
+						"description": "Resumo consolidado de todos os relatórios."
+					}
+				},
+				{
+					"name": "Faturamento Total",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/reports/faturamento-total", "host": ["{{baseUrl}}"], "path": ["reports", "faturamento-total"] },
+						"description": "Faturamento total (soma de transacoes_financeiras.valor_recebido)."
+					}
+				},
+				{
+					"name": "Ticket Médio",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/reports/ticket-medio", "host": ["{{baseUrl}}"], "path": ["reports", "ticket-medio"] },
+						"description": "Ticket médio dos pedidos."
+					}
+				},
+				{
+					"name": "Produtos Mais Vendidos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/reports/produtos-mais-vendidos?limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["reports", "produtos-mais-vendidos"],
+							"query": [{ "key": "limit", "value": "10" }]
+						},
+						"description": "Produtos mais vendidos."
+					}
+				},
+				{
+					"name": "Clientes com Mais Compras",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/reports/clientes-com-mais-compras?limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["reports", "clientes-com-mais-compras"],
+							"query": [{ "key": "limit", "value": "10" }]
+						},
+						"description": "Clientes com mais pedidos e maior valor."
+					}
+				},
+				{
+					"name": "Estoque Baixo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/reports/estoque-baixo?threshold=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["reports", "estoque-baixo"],
+							"query": [{ "key": "threshold", "value": "10" }]
+						},
+						"description": "Produtos com estoque igual ou abaixo do limite."
+					}
+				},
+				{
+					"name": "Export — Faturamento (CSV)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/reports/faturamento-total/export/csv", "host": ["{{baseUrl}}"], "path": ["reports", "faturamento-total", "export", "csv"] },
+						"description": "Baixa o faturamento total em CSV. Qualquer relatório aceita /export/csv e /export/pdf."
+					}
+				},
+				{
+					"name": "Export — Produtos Mais Vendidos (PDF)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/reports/produtos-mais-vendidos/export/pdf", "host": ["{{baseUrl}}"], "path": ["reports", "produtos-mais-vendidos", "export", "pdf"] },
+						"description": "Baixa os produtos mais vendidos em PDF."
+					}
+				}
+			]
+		},
+		{
+			"name": "🏥 Health Check",
+			"request": {
+				"auth": { "type": "noauth" },
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/", "host": ["{{baseUrl}}"], "path": [""] },
+				"description": "Verifica se a API está no ar.\n\n📖 Público."
+			}
+		}
+	],
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:3000", "type": "string" }
+	]
+}

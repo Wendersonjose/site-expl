@@ -87,3 +87,39 @@ export const pedidoService = {
     return handleResponse(res)
   }
 }
+
+export const pagamentoService = {
+  // GET /payments/methods -> [{ id, nome, ativo }]
+  async formas() {
+    const res = await fetch(`${API_URL}/payments/methods`)
+    return handleResponse(res)
+  },
+
+  // POST /payments -> transação confirmada (marca o pedido como pago)
+  async pagar(idPedido, idForma) {
+    const res = await fetch(`${API_URL}/payments`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ idPedido, idForma })
+    })
+    return handleResponse(res)
+  }
+}
+
+export const avaliacaoService = {
+  // GET /reviews/product/:id -> { media, total, avaliacoes: [...] }
+  async doProduto(idProduto) {
+    const res = await fetch(`${API_URL}/reviews/product/${idProduto}`)
+    return handleResponse(res)
+  },
+
+  // POST /reviews -> avaliação criada (requer login e ter comprado o produto)
+  async avaliar(idProduto, idPedido, nota, comentario) {
+    const res = await fetch(`${API_URL}/reviews`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ idProduto, idPedido, nota, comentario })
+    })
+    return handleResponse(res)
+  }
+}

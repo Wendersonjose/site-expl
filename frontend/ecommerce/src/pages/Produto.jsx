@@ -3,9 +3,18 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useCarrinho } from '../context/CarrinhoContext'
-import { produtoService } from '../services/apiService'
+import { produtoService, avaliacaoService } from '../services/apiService'
 
 const IMAGEM_PADRAO = 'https://placehold.co/400x300?text=Expl%F0%9F%92%A5'
+
+function Estrelas({ nota }) {
+  const cheias = Math.round(nota)
+  return (
+    <span style={{ color: 'orange', letterSpacing: '2px' }}>
+      {'★'.repeat(cheias)}{'☆'.repeat(5 - cheias)}
+    </span>
+  )
+}
 
 function Produto() {
   const { id } = useParams()
@@ -16,6 +25,7 @@ function Produto() {
   const [carregando, setCarregando] = useState(true)
   const [quantidade, setQuantidade] = useState(1)
   const [adicionado, setAdicionado] = useState(false)
+  const [avaliacoes, setAvaliacoes] = useState({ media: 0, total: 0, avaliacoes: [] })
 
   useEffect(() => {
     setCarregando(true)
@@ -23,6 +33,10 @@ function Produto() {
       .then(setProduto)
       .catch(() => setProduto(null))
       .finally(() => setCarregando(false))
+
+    avaliacaoService.doProduto(id)
+      .then(setAvaliacoes)
+      .catch(() => setAvaliacoes({ media: 0, total: 0, avaliacoes: [] }))
   }, [id])
 
   function handleAdicionar() {
@@ -73,6 +87,31 @@ function Produto() {
       <button onClick={() => navigate('/carrinho')} style={{ background: '#333' }}>
         Ver Carrinho
       </button>
+
+      <div style={{ marginTop: '48px', textAlign: 'left', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+        <h3 style={{ borderBottom: '1px solid #333', paddingBottom: '10px' }}>
+          Avaliações{' '}
+          {avaliacoes.total > 0 && (
+            <span style={{ fontSize: '15px', color: '#aaa' }}>
+              <Estrelas nota={avaliacoes.media} /> {avaliacoes.media.toFixed(1)} ({avaliacoes.total})
+            </span>
+          )}
+        </h3>
+
+        {avaliacoes.total === 0 ? (
+          <p style={{ color: '#888' }}>Este produto ainda não foi avaliado.</p>
+        ) : (
+          avaliacoes.avaliacoes.map(av => (
+            <div key={av.id} style={{ padding: '12px 0', borderBottom: '1px solid #222' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong>{av.usuario.nome}</strong>
+                <Estrelas nota={av.nota} />
+              </div>
+              {av.comentario && <p style={{ margin: '6px 0 0', color: '#ccc' }}>{av.comentario}</p>}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   )
 }
