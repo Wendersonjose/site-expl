@@ -1,109 +1,75 @@
+import { AppError } from '../../shared/AppError.js';
+import { hashPassword } from '../../shared/password.js';
 import * as userRepository from './users.repository.js';
+import { toUserDTO } from './users.mapper.js';
+import { parseId, validateUserPayload } from './users.validation.js';
 
-function createHttpError(statusCode, message) {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-}
-
-function validateId(id) {
-  const numericId = Number(id);
-
-  if (!Number.isInteger(numericId) || numericId <= 0) {
-    throw createHttpError(400, 'ID do usuário inválido');
-  }
-
-  return numericId;
-}
-
-function validateUserPayload(payload, { partial = false } = {}) {
-  const errors = [];
-
-  if (!partial || payload.nome !== undefined) {
-    if (!payload.nome || payload.nome.trim().length < 3) {
-      errors.push('O nome deve ter pelo menos 3 caracteres');
-    }
-  }
-
-  if (!partial || payload.email !== undefined) {
-    if (!payload.email || !payload.email.includes('@')) {
-      errors.push('Email inválido');
-    }
-  }
-
-  if (!partial || payload.senha !== undefined) {
-    if (!payload.senha || payload.senha.length < 6) {
-      errors.push('A senha deve ter pelo menos 6 caracteres');
-    }
-  }
-
-  return errors;
-}
-
-function throwIfErrors(errors) {
-  if (errors.length > 0) {
-    throw createHttpError(400, errors.join('. '));
-  }
-}
-
-export async function listUsers(filters) {
-  return userRepository.findAll(filters);
+export async function listUsers() {
+  const rows = await userRepository.findAll();
+  return rows.map(toUserDTO);
 }
 
 export async function getUserById(id) {
-  const userId = validateId(id);
-  const user = await userRepository.findById(userId);
+  const userId = parseId(id);
+  const row = await userRepository.findById(userId);
 
-  if (!user) {
-    throw createHttpError(404, 'Usuário não encontrado');
+  if (!row) {
+    throw AppError.notFound('Usuário não encontrado');
   }
 
-  return user;
+  return toUserDTO(row);
 }
 
 export async function createUser(payload) {
-  const errors = validateUserPayload(payload);
-  throwIfErrors(errors);
+  validateUserPayload(payload);
 
-  const existingUser = await userRepository.findByEmail(payload.email);
+  const email = payload.email.trim().toLowerCase();
 
-  if (existingUser) {
-    throw createHttpError(409, 'Email já cadastrado');
+  if (await userRepository.existsByEmail(email)) {
+    throw AppError.conflict('E-mail já cadastrado');
   }
 
-  return userRepository.create({
+  const row = await userRepository.create({
     nome: payload.nome.trim(),
-    email: payload.email.trim().toLowerCase(),
-    senha: payload.senha,
-    perfil: payload.perfil || 'cliente',
+    email,
+    senhaHash: await hashPassword(payload.senha),
+    perfil: payload.perfil ?? 'cliente',
   });
+
+  return toUserDTO(row);
 }
 
 export async function updateUser(id, payload) {
-  const userId = validateId(id);
+  const userId = parseId(id);
+  validateUserPayload(payload, { partial: true });
 
-  const errors = validateUserPayload(payload, { partial: true });
-  throwIfErrors(errors);
+  const current = await userRepository.findById(userId);
 
-  const currentUser = await userRepository.findById(userId);
-
-  if (!currentUser) {
-    throw createHttpError(404, 'Usuário não encontrado');
+  if (!current) {
+    throw AppError.notFound('Usuário não encontrado');
   }
 
-  return userRepository.update(userId, {
-    nome: payload.nome?.trim() ?? currentUser.nome,
-    email: payload.email?.trim().toLowerCase() ?? currentUser.email,
-    perfil: payload.perfil ?? currentUser.perfil,
+  const email = payload.email ? payload.email.trim().toLowerCase() : current.email;
+
+  // Garante que o novo e-mail não pertence a outro usuário.
+  if (email !== current.email && (await userRepository.existsByEmail(email))) {
+    throw AppError.conflict('E-mail já cadastrado');
+  }
+
+  const row = await userRepository.update(userId, {
+    nome: payload.nome?.trim() ?? current.nome,
+    email,
+    perfil: payload.perfil ?? current.perfil,
   });
+
+  return toUserDTO(row);
 }
 
 export async function deleteUser(id) {
-  const userId = validateId(id);
+  const userId = parseId(id);
+  const deleted = await userRepository.remove(userId);
 
-  const deletedUser = await userRepository.remove(userId);
-
-  if (!deletedUser) {
-    throw createHttpError(404, 'Usuário não encontrado');
+  if (!deleted) {
+    throw AppError.notFound('Usuário não encontrado');
   }
 }

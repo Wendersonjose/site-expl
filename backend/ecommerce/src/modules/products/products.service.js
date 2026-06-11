@@ -1,116 +1,127 @@
+import { AppError } from '../../shared/AppError.js';
+import * as categoryRepository from '../categories/categories.repository.js';
 import * as productRepository from './products.repository.js';
+import { toProductDTO } from './products.mapper.js';
+import { parseId, validateProductPayload } from './products.validation.js';
 
-function createHttpError(statusCode, message) {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
+/**
+ * Converte os filtros recebidos via query string em valores tipados que o
+ * repositório entende.
+ */
+function parseFilters(query = {}) {
+  const filters = {};
+
+  if (query.search) {
+    filters.search = String(query.search).trim();
+  }
+
+  if (query.categoria !== undefined) {
+    filters.categoria = Number(query.categoria);
+  }
+
+  if (query.ativo !== undefined) {
+    filters.ativo = query.ativo === 'true' || query.ativo === true;
+  }
+
+  return filters;
 }
 
-function normalizeProductPayload(payload) {
+function normalizeImages(imagens) {
+  if (!Array.isArray(imagens)) {
+    return [];
+  }
+
+  return imagens
+    .filter((image) => image && image.url)
+    .map((image) => ({ url: String(image.url).trim(), principal: Boolean(image.principal) }));
+}
+
+function normalize(payload) {
   return {
-    name: payload.name?.trim(),
-    description: payload.description?.trim() || null,
-    price: Number(payload.price),
-    stock: Number(payload.stock ?? 0),
-    category: payload.category?.trim() || null,
-    imageUrl: payload.imageUrl?.trim() || payload.image_url?.trim() || null,
-    active: payload.active ?? true,
+    nome: payload.nome.trim(),
+    descricao: payload.descricao?.trim() || null,
+    precoVenda: Number(payload.precoVenda),
+    custoUnitario: Number(payload.custoUnitario),
+    estoque: Number(payload.estoque ?? 0),
+    idCategoria: Number(payload.idCategoria),
+    ativo: payload.ativo ?? true,
+    imagens: normalizeImages(payload.imagens),
   };
 }
 
-function validateProductPayload(payload, { partial = false } = {}) {
-  const errors = [];
+async function ensureCategoryExists(idCategoria) {
+  const category = await categoryRepository.findById(idCategoria);
 
-  if (!partial || payload.name !== undefined) {
-    if (!payload.name || payload.name.trim().length < 3) {
-      errors.push('O nome do produto deve ter pelo menos 3 caracteres');
-    }
-  }
-
-  if (!partial || payload.price !== undefined) {
-    const price = Number(payload.price);
-
-    if (!Number.isFinite(price) || price < 0) {
-      errors.push('O preco do produto deve ser um numero maior ou igual a zero');
-    }
-  }
-
-  if (!partial || payload.stock !== undefined) {
-    const stock = Number(payload.stock);
-
-    if (!Number.isInteger(stock) || stock < 0) {
-      errors.push('O estoque do produto deve ser um numero inteiro maior ou igual a zero');
-    }
-  }
-
-  if (errors.length > 0) {
-    throw createHttpError(400, errors.join('. '));
+  if (!category) {
+    throw AppError.notFound('Categoria não encontrada');
   }
 }
 
-function validateId(id) {
-  const numericId = Number(id);
-
-  if (!Number.isInteger(numericId) || numericId <= 0) {
-    throw createHttpError(400, 'ID do produto invalido');
-  }
-
-  return numericId;
-}
-
-export async function listProducts(filters) {
-  return productRepository.findAll(filters);
+export async function listProducts(query) {
+  const rows = await productRepository.findAll(parseFilters(query));
+  return rows.map(toProductDTO);
 }
 
 export async function getProductById(id) {
-  const productId = validateId(id);
-  const product = await productRepository.findById(productId);
+  const productId = parseId(id);
+  const row = await productRepository.findById(productId);
 
-  if (!product) {
-    throw createHttpError(404, 'Produto nao encontrado');
+  if (!row) {
+    throw AppError.notFound('Produto não encontrado');
   }
 
-  return product;
+  return toProductDTO(row);
 }
 
 export async function createProduct(payload) {
   validateProductPayload(payload);
+  const product = normalize(payload);
+  await ensureCategoryExists(product.idCategoria);
 
-  const product = normalizeProductPayload(payload);
-  return productRepository.create(product);
+  const row = await productRepository.create(product);
+  return toProductDTO(row);
 }
 
 export async function updateProduct(id, payload) {
-  const productId = validateId(id);
+  const productId = parseId(id);
   validateProductPayload(payload, { partial: true });
 
-  const currentProduct = await productRepository.findById(productId);
+  const current = await productRepository.findById(productId);
 
-  if (!currentProduct) {
-    throw createHttpError(404, 'Produto nao encontrado');
+  if (!current) {
+    throw AppError.notFound('Produto não encontrado');
   }
 
-  const product = {
-    name: payload.name?.trim() ?? currentProduct.name,
-    description: payload.description?.trim() ?? currentProduct.description,
-    price: payload.price !== undefined ? Number(payload.price) : Number(currentProduct.price),
-    stock: payload.stock !== undefined ? Number(payload.stock) : currentProduct.stock,
-    category: payload.category?.trim() ?? currentProduct.category,
-    imageUrl:
-      payload.imageUrl?.trim() ??
-      payload.image_url?.trim() ??
-      currentProduct.image_url,
-    active: payload.active ?? currentProduct.active,
+  const idCategoria =
+    payload.idCategoria !== undefined ? Number(payload.idCategoria) : current.id_categoria;
+
+  if (payload.idCategoria !== undefined) {
+    await ensureCategoryExists(idCategoria);
+  }
+
+  // Mescla o estado atual com os campos enviados (atualização parcial).
+  const merged = {
+    nome: payload.nome?.trim() ?? current.nome,
+    descricao:
+      payload.descricao !== undefined ? payload.descricao?.trim() || null : current.descricao,
+    precoVenda: payload.precoVenda !== undefined ? Number(payload.precoVenda) : Number(current.preco_venda),
+    custoUnitario:
+      payload.custoUnitario !== undefined ? Number(payload.custoUnitario) : Number(current.custo_unitario),
+    estoque: payload.estoque !== undefined ? Number(payload.estoque) : current.estoque_atual,
+    idCategoria,
+    ativo: payload.ativo !== undefined ? Boolean(payload.ativo) : Boolean(current.ativo),
+    imagens: payload.imagens !== undefined ? normalizeImages(payload.imagens) : undefined,
   };
 
-  return productRepository.update(productId, product);
+  const row = await productRepository.update(productId, merged);
+  return toProductDTO(row);
 }
 
 export async function deleteProduct(id) {
-  const productId = validateId(id);
-  const deletedProduct = await productRepository.remove(productId);
+  const productId = parseId(id);
+  const deleted = await productRepository.remove(productId);
 
-  if (!deletedProduct) {
-    throw createHttpError(404, 'Produto nao encontrado');
+  if (!deleted) {
+    throw AppError.notFound('Produto não encontrado');
   }
 }
