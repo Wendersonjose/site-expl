@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro | EXPLOSION</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body class="auth-page" data-mode="register">
+  <aside class="auth-brand">
+    <a class="brand-mark" href="/">
+      <span class="brand-bolt">E</span>
+      <span>EXPLOSION</span>
+    </a>
+
+    <div>
+      <p class="eyebrow">Crie seu acesso</p>
+      <h1>Comece com energia.</h1>
+      <p>Cadastre-se para navegar pelos produtos, montar seu carrinho e acessar a area inicial da loja.</p>
+    </div>
+  </aside>
+
+  <main class="auth-shell">
+    <section class="auth-card">
+      <h2>Criar cadastro</h2>
+      <p class="lead">Depois do cadastro, voce volta para o login e entra com a nova conta.</p>
+
+      <p class="message" data-message></p>
+
+      <form data-auth-form>
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input id="nome" name="nome" type="text" autocomplete="name" placeholder="Seu nome" required minlength="3">
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="voce@email.com" required>
+        </div>
+
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input id="senha" name="senha" type="password" autocomplete="new-password" placeholder="Minimo 6 caracteres" required minlength="6">
+        </div>
+
+        <button class="btn full" type="submit" data-label="Cadastrar">Cadastrar</button>
+      </form>
+
+      <p class="form-footer">
+        Ja tem conta?
+        <a href="/auth/login.html">Voltar para login</a>
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="/assets/js/auth.js"></script>
+</body>
+</html>

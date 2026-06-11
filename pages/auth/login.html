@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | EXPLOSION</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body class="auth-page" data-mode="login">
+  <aside class="auth-brand">
+    <a class="brand-mark" href="/">
+      <span class="brand-bolt">E</span>
+      <span>EXPLOSION</span>
+    </a>
+
+    <div>
+      <p class="eyebrow">Energia para sua rotina</p>
+      <h1>Entre na sua conta.</h1>
+      <p>Pesquise energeticos, monte seu carrinho e acompanhe a operacao da loja em uma experiencia simples e direta.</p>
+    </div>
+  </aside>
+
+  <main class="auth-shell">
+    <section class="auth-card">
+      <h2>Acessar conta</h2>
+      <p class="lead">Use seu email e senha para entrar na area da EXPLOSION.</p>
+
+      <p class="message" data-message></p>
+
+      <form data-auth-form>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="voce@email.com" required>
+        </div>
+
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input id="senha" name="senha" type="password" autocomplete="current-password" placeholder="Sua senha" required>
+        </div>
+
+        <button class="btn full" type="submit" data-label="Entrar">Entrar</button>
+      </form>
+
+      <p class="form-footer">
+        Nao possui conta?
+        <a href="/auth/cadastro.html">Criar cadastro</a>
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="/assets/js/auth.js"></script>
+</body>
+</html>
