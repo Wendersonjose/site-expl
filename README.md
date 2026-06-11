@@ -12,7 +12,7 @@ O sistema agora possui um fluxo basico completo de frontend e backend:
 - vitrine de produtos;
 - pesquisa de produtos;
 - carrinho local;
-- pedidos registrados no PostgreSQL;
+- pedidos registrados no MySQL;
 - baixa automatica de estoque;
 - painel para administradores gerenciarem produtos, pedidos, estoque e clientes.
 
@@ -54,13 +54,13 @@ Arquivos principais:
 
 - `src/server.js`: inicia o servidor.
 - `src/app.js`: configura Express, CORS, JSON, arquivos estaticos e rotas.
-- `src/config/database.js`: conecta com PostgreSQL.
+- `src/config/database.js`: conecta com MySQL.
 - `src/middlewares/error.middleware.js`: padroniza respostas de erro.
 - `src/modules/auth`: rotas e regras de login/cadastro.
 - `src/modules/users`: CRUD basico de usuarios.
 - `src/modules/products`: CRUD basico de produtos.
 - `src/modules/orders`: criacao, listagem e atualizacao de pedidos.
-- `database/schema.sql`: estrutura das tabelas PostgreSQL usadas pelo backend.
+- `database/schema.sql`: estrutura das tabelas MySQL usadas pelo backend.
 
 Rotas principais:
 
@@ -84,7 +84,7 @@ Rotas principais:
 
 ## Banco de Dados
 
-O backend atual usa **PostgreSQL**.
+O backend atual usa **MySQL** (hospedado no Railway).
 
 O arquivo `backend/ecommerce/database/schema.sql` cria:
 
@@ -93,7 +93,7 @@ O arquivo `backend/ecommerce/database/schema.sql` cria:
 - tabela `orders`, usada para registrar pedidos.
 - tabela `order_items`, usada para registrar os produtos de cada pedido.
 
-Tambem existe o arquivo `database/Explo_DB.sql`, que e um modelo maior em **MySQL** com tabelas de pedidos, carrinho, pagamentos, cupons e outras partes do e-commerce. Ele serve como referencia de modelagem, mas nao e usado diretamente pelo backend atual, porque o backend esta configurado para PostgreSQL.
+Tambem existe o arquivo `database/Explo_DB.sql`, que e um modelo maior em **MySQL** com tabelas de pedidos, carrinho, pagamentos, cupons e outras partes do e-commerce. Ele serve como referencia de modelagem, mas nao e usado diretamente pelo backend atual.
 
 ## Como Rodar o Projeto
 
@@ -102,24 +102,19 @@ Tambem existe o arquivo `database/Explo_DB.sql`, que e um modelo maior em **MySQ
 Voce precisa ter instalado:
 
 - Node.js 18 ou superior;
-- PostgreSQL;
 - Git.
 
-### 2. Criar o banco PostgreSQL
+O banco MySQL ja esta hospedado no Railway, entao nao e preciso instalar banco localmente. Se quiser usar um MySQL local, instale o MySQL 8 e ajuste o `.env`.
 
-No PostgreSQL, crie o banco:
+### 2. Criar as tabelas no banco
 
-```sql
-CREATE DATABASE explosion_ecommerce;
-```
-
-Depois execute o schema:
+Com o `.env` configurado (passo 3), execute dentro de `backend/ecommerce`:
 
 ```bash
-psql -U postgres -d explosion_ecommerce -f backend/ecommerce/database/schema.sql
+node database/apply-schema.js
 ```
 
-Se usar pgAdmin, basta abrir o arquivo `backend/ecommerce/database/schema.sql` e executar no banco `explosion_ecommerce`.
+Isso aplica o arquivo `backend/ecommerce/database/schema.sql` no banco configurado. Tambem e possivel executar o schema manualmente pelo MySQL Workbench ou pela CLI `mysql`.
 
 ### 3. Configurar variaveis de ambiente
 
@@ -131,11 +126,11 @@ Exemplo:
 PORT=3000
 NODE_ENV=development
 
-DB_USER=postgres
-DB_HOST=localhost
-DB_NAME=explosion_ecommerce
-DB_PASSWORD=sua_senha_do_postgres
-DB_PORT=5432
+DB_HOST=acela.proxy.rlwy.net
+DB_PORT=29604
+DB_USER=root
+DB_PASSWORD=senha_do_railway
+DB_NAME=railway
 
 JWT_SECRET=uma_chave_secreta_para_desenvolvimento
 JWT_EXPIRES_IN=7d
@@ -187,7 +182,7 @@ http://localhost:3000
 7. Navegue pela home, pesquise produtos e adicione itens ao carrinho.
 8. Finalize o carrinho para criar um pedido.
 
-Cadastros publicos sao sempre criados como cliente. Para transformar uma conta de teste em administrador, execute no PostgreSQL:
+Cadastros publicos sao sempre criados como cliente. Para transformar uma conta de teste em administrador, execute no MySQL:
 
 ```sql
 UPDATE users

@@ -31,6 +31,7 @@ const fallbackProducts = [
     price: 8.9,
     stock: 42,
     category: 'Classico',
+    image_url: '/assets/images/products/explosion-original.svg',
     active: true,
   },
   {
@@ -40,6 +41,7 @@ const fallbackProducts = [
     price: 9.9,
     stock: 35,
     category: 'Frutado',
+    image_url: '/assets/images/products/explosion-tropical.svg',
     active: true,
   },
   {
@@ -49,6 +51,7 @@ const fallbackProducts = [
     price: 10.5,
     stock: 28,
     category: 'Zero',
+    image_url: '/assets/images/products/explosion-zero.svg',
     active: true,
   },
 ];
@@ -86,11 +89,19 @@ function saveCart() {
   localStorage.setItem('explosion_cart', JSON.stringify(cart));
 }
 
+function renderProductMedia(product) {
+  if (product.image_url) {
+    return `<img src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}" loading="lazy">`;
+  }
+
+  return escapeHtml(product.name.charAt(0));
+}
+
 function renderProducts(items) {
   productsGrid.innerHTML = items
     .map((product) => `
       <article class="product-card">
-        <div class="product-media">${escapeHtml(product.name.charAt(0))}</div>
+        <div class="product-media">${renderProductMedia(product)}</div>
         <div class="product-body">
           <h3>${escapeHtml(product.name)}</h3>
           <p>${escapeHtml(product.description || 'Energetico EXPLOSION pronto para venda.')}</p>

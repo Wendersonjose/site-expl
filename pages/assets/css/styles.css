@@ -350,6 +350,13 @@ select {
   font-weight: 900;
 }
 
+.product-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .product-body {
   padding: 18px;
 }

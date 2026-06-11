@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "explosion-backend",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["src/server.js"],
+      "cwd": "backend/ecommerce",
+      "port": 3000
+    }
+  ]
+}
