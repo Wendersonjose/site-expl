@@ -1,0 +1,147 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #111;
+  color: white;
+  text-align: center;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #000;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-logo {
+  color: white;
+  text-decoration: none;
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navbar-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.navbar-links a:hover {
+  color: orange;
+}
+
+/* Container geral */
+.container {
+  padding: 30px;
+}
+
+/* Grid de produtos */
+.grid-produtos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 30px;
+}
+
+/* Card de produto */
+.card-produto {
+  background: #222;
+  border: 1px solid #fff;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-produto img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-produto h3 {
+  font-size: 1rem;
+  color: white;
+}
+
+.card-produto p {
+  color: orange;
+  font-weight: bold;
+}
+
+.card-produto a {
+  background-color: orange;
+  color: white;
+  text-align: center;
+  padding: 15px 25px;
+  font-size: 16px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  margin-top: auto;
+  display: block;
+}
+
+.card-produto a:hover {
+  background-color: red;
+  color: white;
+}
+
+/* Botão padrão */
+button {
+  padding: 15px 25px;
+  font-size: 16px;
+  background-color: orange;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+button:hover {
+  background-color: red;
+  color: white;
+}
+
+/* Tabelas */
+table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  width: 60%;
+}
+
+th, td {
+  border: 1px solid #fff;
+  padding: 10px;
+}
+
+th {
+  background-color: #333;
+}
+
+/* Responsivo mobile */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .grid-produtos {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  table {
+    width: 100%;
+  }
+}
