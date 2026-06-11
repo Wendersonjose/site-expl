@@ -29,3 +29,12 @@ temp/
 .env
 .env.local
 .env.*.local
+
+# Build do frontend (Vite)
+dist/
+
+# Configuração local do Claude Code (não versionar)
+.claude/
+
+# Collection do Postman (mantida apenas localmente)
+backend/ecommerce/postman/
