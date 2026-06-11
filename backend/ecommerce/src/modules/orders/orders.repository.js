@@ -1,7 +1,7 @@
 import pool from '../../config/database.js';
 
 export async function findAll() {
-  const result = await pool.query(`
+  const [rows] = await pool.query(`
     SELECT
       orders.id,
       orders.status,
@@ -9,7 +9,7 @@ export async function findAll() {
       orders.created_at,
       users.nome AS customer_name,
       users.email AS customer_email,
-      COALESCE(SUM(order_items.quantity), 0)::INTEGER AS item_count
+      CAST(COALESCE(SUM(order_items.quantity), 0) AS SIGNED) AS item_count
     FROM orders
     INNER JOIN users ON users.id = orders.user_id
     LEFT JOIN order_items ON order_items.order_id = orders.id
@@ -17,47 +17,47 @@ export async function findAll() {
     ORDER BY orders.created_at DESC
   `);
 
-  return result.rows;
+  return rows;
 }
 
 export async function findByUserId(userId) {
-  const result = await pool.query(
+  const [rows] = await pool.query(
     `
       SELECT id, status, total, created_at, updated_at
       FROM orders
-      WHERE user_id = $1
+      WHERE user_id = ?
       ORDER BY created_at DESC
     `,
     [userId],
   );
 
-  return result.rows;
+  return rows;
 }
 
 export async function create(userId, items) {
-  const client = await pool.connect();
+  const connection = await pool.getConnection();
 
   try {
-    await client.query('BEGIN');
+    await connection.beginTransaction();
 
     const productIds = items.map((item) => item.productId);
-    const productsResult = await client.query(
+    const [products] = await connection.query(
       `
         SELECT id, name, price, stock, active
         FROM products
-        WHERE id = ANY($1::int[])
+        WHERE id IN (?)
         FOR UPDATE
       `,
       [productIds],
     );
 
-    if (productsResult.rows.length !== productIds.length) {
+    if (products.length !== productIds.length) {
       const error = new Error('Um ou mais produtos nao foram encontrados');
       error.statusCode = 400;
       throw error;
     }
 
-    const productsById = new Map(productsResult.rows.map((product) => [product.id, product]));
+    const productsById = new Map(products.map((product) => [product.id, product]));
     let total = 0;
 
     for (const item of items) {
@@ -78,58 +78,74 @@ export async function create(userId, items) {
       total += Number(product.price) * item.quantity;
     }
 
-    const orderResult = await client.query(
+    const [orderResult] = await connection.query(
       `
         INSERT INTO orders (user_id, total)
-        VALUES ($1, $2)
-        RETURNING id, user_id, status, total, created_at
+        VALUES (?, ?)
       `,
       [userId, total],
     );
 
-    const order = orderResult.rows[0];
+    const [orderRows] = await connection.query(
+      `
+        SELECT id, user_id, status, total, created_at
+        FROM orders
+        WHERE id = ?
+      `,
+      [orderResult.insertId],
+    );
+
+    const order = orderRows[0];
 
     for (const item of items) {
       const product = productsById.get(item.productId);
 
-      await client.query(
+      await connection.query(
         `
           INSERT INTO order_items (order_id, product_id, quantity, unit_price)
-          VALUES ($1, $2, $3, $4)
+          VALUES (?, ?, ?, ?)
         `,
         [order.id, item.productId, item.quantity, product.price],
       );
 
-      await client.query(
+      await connection.query(
         `
           UPDATE products
-          SET stock = stock - $1, updated_at = NOW()
-          WHERE id = $2
+          SET stock = stock - ?, updated_at = NOW()
+          WHERE id = ?
         `,
         [item.quantity, item.productId],
       );
     }
 
-    await client.query('COMMIT');
+    await connection.commit();
     return order;
   } catch (error) {
-    await client.query('ROLLBACK');
+    await connection.rollback();
     throw error;
   } finally {
-    client.release();
+    connection.release();
   }
 }
 
 export async function updateStatus(id, status) {
-  const result = await pool.query(
+  await pool.query(
     `
       UPDATE orders
-      SET status = $1, updated_at = NOW()
-      WHERE id = $2
-      RETURNING id, user_id, status, total, created_at, updated_at
+      SET status = ?, updated_at = NOW()
+      WHERE id = ?
     `,
     [status, id],
   );
 
-  return result.rows[0];
+  const [rows] = await pool.query(
+    `
+      SELECT id, user_id, status, total, created_at, updated_at
+      FROM orders
+      WHERE id = ?
+    `,
+    [id],
+  );
+
+  return rows[0];
 }
